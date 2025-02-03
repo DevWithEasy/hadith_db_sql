@@ -1,22 +1,3 @@
-const express = require('express')
-const sqlite3 = require("sqlite3").verbose();
-
-const app = express()
-
-const db = new sqlite3.Database("./hadith_bn.db",(err) => {
-    if (err) {
-        console.error("Error connecting to database:", err.message);
-    } else {
-        console.log("Connected to SQLite database.");
-    }
-});
-
-app.get('/',(req,res)=>{
-    res.json({
-        message: 'Welcome to the Hadith API'
-    })
-})
-
 app.get('/data',(req,res)=>{
     db.all("SELECT * FROM hadith",(err, rows) => {
         if (err) {
