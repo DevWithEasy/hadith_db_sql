@@ -16,10 +16,9 @@ app.get("/", (req, res) => {
 });
 
 app.get("/create", (req, res) => {
-
+  const jsonData = JSON.parse(fs.readFileSync("./json/video_cat.json", "utf8"));
+  
 });
-
-
 
 app.get("/generate/quran/ayah", (req, res) => {
   const q_json = JSON.parse(fs.readFileSync("./json/ayah.json", "utf8"));
