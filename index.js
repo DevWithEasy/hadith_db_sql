@@ -3,7 +3,7 @@ const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
 
 const app = express();
-const db = new sqlite3.Database("./mumin_app.db", (err) => {
+const db = new sqlite3.Database("./salatur_rasul.db", (err) => {
   if (err) {
     console.error("Error connecting to database:", err.message);
   } else {
@@ -16,8 +16,23 @@ app.get("/", (req, res) => {
 });
 
 app.get("/create", (req, res) => {
-  const jsonData = JSON.parse(fs.readFileSync("./json/video_cat.json", "utf8"));
-  
+  const jsonData = JSON.parse(fs.readFileSync("./json/salatur_category.json", "utf8"));
+  const insertQuery = `INSERT INTO category (id, name) VALUES (?, ?)`;
+
+  db.serialize(() => {
+    const stmt = db.prepare(insertQuery);
+
+    jsonData.forEach((item) => {
+      stmt.run(item.id, item.name, item.image);
+    });
+
+    stmt.finalize((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Database insertion failed" });
+      }
+      res.json({ message: "Salah category data inserted successfully" });
+    });
+  });
 });
 
 app.get("/generate/quran/ayah", (req, res) => {
