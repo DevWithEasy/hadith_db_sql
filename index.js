@@ -3,7 +3,7 @@ const sqlite3 = require("sqlite3").verbose();
 const fs = require("fs");
 
 const app = express();
-const db = new sqlite3.Database("./salatur_rasul.db", (err) => {
+const db = new sqlite3.Database("./quran.db", (err) => {
   if (err) {
     console.error("Error connecting to database:", err.message);
   } else {
@@ -16,24 +16,38 @@ app.get("/", (req, res) => {
 });
 
 app.get("/create", (req, res) => {
-  const jsonData = JSON.parse(fs.readFileSync("./json/salatur_category.json", "utf8"));
-  const insertQuery = `INSERT INTO category (id, name) VALUES (?, ?)`;
+  const jsonData = JSON.parse(fs.readFileSync("./quran/tafsir.json", "utf8"));
+
+  const insertQuery = `
+    INSERT INTO tafsir (id, start, end, tafsir_text) 
+    VALUES (?, ?, ?, ?)`;
 
   db.serialize(() => {
     const stmt = db.prepare(insertQuery);
 
-    jsonData.forEach((item) => {
-      stmt.run(item.id, item.name, item.image);
+    jsonData.forEach((item, index) => {
+      stmt.run(
+        item.id,
+        item.start,
+        item.end,
+        item.tafsir_text,
+        (err) => {
+          if (err) {
+            console.error(`Error inserting record ${index + 1}:`, err.message);
+          } else {
+            console.log(`Inserted record ${index + 1} successfully.`);
+          }
+        }
+      );
     });
 
-    stmt.finalize((err) => {
-      if (err) {
-        return res.status(500).json({ error: "Database insertion failed" });
-      }
-      res.json({ message: "Salah category data inserted successfully" });
-    });
+    stmt.finalize();
   });
+
+  res.send("Data inserted successfully.");
 });
+
+
 
 app.get("/generate/quran/ayah", (req, res) => {
   const q_json = JSON.parse(fs.readFileSync("./json/ayah.json", "utf8"));
